@@ -1,16 +1,16 @@
-﻿// WEBSITE LOGIC
-        // ============================================================
-        // Everything below this point is the website engine: utilities,
-        // rendering, filtering, sorting, routing and initialization.
-        // You normally never need to touch this part. All content
-        // lives in the sections above.
+﻿
+        
+        
+        
+        
+        
 
 
-        // ============================================================
-        // UTILITY FUNCTIONS
-        // ============================================================
+        
+        
+        
 
-        /** Escapes text so it can be safely inserted into HTML. */
+        
         function escapeHtml(value) {
             return String(value == null ? "" : value)
                 .replace(/&/g, "&amp;")
@@ -248,16 +248,16 @@
                     'onerror="this.style.display=\'none\'"></video>';
             }
 
-            // "image" and "gif" both render as an <img>. The browser
-            // handles the rest (GIFs animate automatically).
+            
+            
             return placeholder +
                 '<img src="' + escapeHtml(asset.media) + '" alt="Preview of ' + escapeHtml(asset.name) + '" loading="lazy" ' +
                 'onerror="this.style.display=\'none\'">';
         }
 
-        /* ---------- Text formatting ---------- */
+        
 
-        /** Applies inline formatting (**bold** and `code`) to escaped text. */
+        
         function formatInline(text) {
             return escapeHtml(text)
                 .replace(/`([^`]+)`/g, "<code>$1</code>")

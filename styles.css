@@ -1,64 +1,45 @@
-﻿/* ============================================================
-           THEME VARIABLES
-           ============================================================
-           The entire visual theme of the site is controlled from here.
-           Change a value once and it applies everywhere.
-           Palette rule: dark navy + medium blue + white/light neutrals,
-           plus a single red accent used only for sale prices. */
+﻿
         :root {
-            /* Core brand palette */
-            --color-navy: #14213a;         /* primary dark navy: header, footer, dark sections */
-            --color-navy-deep: #0d1728;    /* darker navy: code blocks, footer base */
-            --color-navy-soft: #1d3055;    /* lighter navy: gradients on dark areas */
-            --color-blue: #2f6fdb;         /* secondary blue: buttons, links, active states */
-            --color-blue-dark: #2559b4;    /* darker blue: button hover states */
-            --color-blue-bright: #a7c6ff;  /* light blue: text accents on dark navy */
-            --color-blue-soft: #e9f0fb;    /* very light blue tint: hover backgrounds, notes */
-            --color-light: #f5f7fb;        /* light neutral: page background */
+            
+            --color-navy: #14213a;         
+            --color-navy-deep: #0d1728;    
+            --color-navy-soft: #1d3055;    
+            --color-blue: #2f6fdb;         
+            --color-blue-dark: #2559b4;    
+            --color-blue-bright: #a7c6ff;  
+            --color-blue-soft: #e9f0fb;    
+            --color-light: #f5f7fb;        
             --color-white: #ffffff;
-            --color-text: #263349;         /* main body text */
-            --color-muted: #5c6a83;        /* secondary / metadata text */
-            --color-border: #dde4ee;       /* borders and dividers */
+            --color-text: #263349;         
+            --color-muted: #5c6a83;        
+            --color-border: #dde4ee;       
 
-            /* Sale / discount accent: badges and struck-through old prices */
+            
             --color-sale: #c73e3e;
 
-            /* Shadows (kept subtle, no glows) */
+            
             --shadow-sm: 0 1px 3px rgba(13, 23, 40, 0.08);
             --shadow-md: 0 8px 22px rgba(13, 23, 40, 0.10);
             --shadow-lg: 0 16px 40px rgba(13, 23, 40, 0.16);
 
-            /* Corner radii (deliberately sharp) */
+            
             --radius-sm: 4px;
             --radius-md: 6px;
             --radius-lg: 8px;
 
-            /* Typography */
+            
             --font-sans: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
             --font-display: "Space Grotesk", "IBM Plex Sans", -apple-system, BlinkMacSystemFont, Arial, sans-serif;
             --font-mono: "JetBrains Mono", "Cascadia Code", Consolas, Menlo, "Courier New", monospace;
 
-            /* Layout */
+            
             --header-height: 64px;
             --container-max: 1120px;
         }
 
-        /* USING YOUR OWN FONT FILE (for example the real "Cosmic Relief"):
-           1. Put the font file (e.g. cosmic-relief.woff2) next to index.html.
-           2. Uncomment this block and adjust the file and family name.
-           3. Put the family name first in --font-sans or --font-display above.
+        
 
-        @font-face {
-            font-family: "Cosmic Relief";
-            src: url("cosmic-relief.woff2") format("woff2");
-            font-weight: 400;
-            font-display: swap;
-        }
-        */
-
-        /* ============================================================
-           GLOBAL STYLES
-           ============================================================ */
+        
         * { box-sizing: border-box; }
 
         body {
@@ -81,7 +62,7 @@
         p { margin: 0; }
         ul { margin: 0; }
 
-        /* Display font: headings, buttons, nav, prices and small labels. */
+        
         h1, h2, h3, h4,
         .brand,
         .nav-link,
@@ -101,7 +82,7 @@
         a { color: var(--color-blue); text-decoration: none; }
         a:hover { text-decoration: underline; }
 
-        /* Centered page container */
+        
         .container {
             width: 100%;
             max-width: var(--container-max);
@@ -111,17 +92,17 @@
 
         .site-main { flex: 1; }
 
-        /* Small inline icon alignment */
+        
         .icon { flex-shrink: 0; vertical-align: -0.18em; }
 
-        /* Visually hidden, but announced by screen readers */
+        
         .sr-only {
             position: absolute; width: 1px; height: 1px;
             padding: 0; margin: -1px; overflow: hidden;
             clip: rect(0 0 0 0); white-space: nowrap; border: 0;
         }
 
-        /* Skip link for keyboard users */
+        
         .skip-link {
             position: fixed; top: -60px; left: 16px; z-index: 300;
             background: var(--color-blue); color: var(--color-white);
@@ -130,10 +111,10 @@
         }
         .skip-link:focus { top: 12px; text-decoration: none; }
 
-        /* Visible focus outline for keyboard users */
+        
         :focus-visible { outline: 2px solid var(--color-blue); outline-offset: 2px; border-radius: 3px; }
 
-        /* ---------- Buttons ---------- */
+        
         .btn {
             display: inline-flex;
             align-items: center;
@@ -161,18 +142,18 @@
         .btn-outline { background: var(--color-white); color: var(--color-blue); border-color: var(--color-blue); }
         .btn-outline:hover { background: var(--color-blue-soft); }
 
-        /* Solid light button for dark navy backgrounds */
+        
         .btn-light { background: var(--color-white); color: var(--color-navy); }
         .btn-light:hover { background: var(--color-blue-bright); }
 
-        /* Outlined button for dark navy backgrounds */
+        
         .btn-outline-light { background: transparent; color: var(--color-white); border-color: rgba(255, 255, 255, 0.45); }
         .btn-outline-light:hover { background: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.7); }
 
         .btn-small { padding: 7px 14px; font-size: 0.85rem; border-radius: var(--radius-sm); }
         .btn-block { width: 100%; }
 
-        /* Text-style button */
+        
         .link-btn {
             background: none; border: none; padding: 0;
             font: inherit; font-size: 0.88rem; font-weight: 600;
@@ -180,9 +161,7 @@
         }
         .link-btn:hover { text-decoration: underline; }
 
-        /* ---------- Sale pricing ----------
-           Deliberately square: contrast against the slightly rounded
-           cards and buttons. */
+        
         .sale-badge {
             display: inline-flex;
             align-items: center;
@@ -197,14 +176,14 @@
         }
         .sale-badge-lg { font-size: 0.78rem; padding: 5px 10px; }
 
-        /* ---------- Page transition (subtle) ---------- */
+        
         .page { animation: pageEnter 0.3s ease both; }
         @keyframes pageEnter {
             from { opacity: 0; transform: translateY(8px); }
             to   { opacity: 1; transform: none; }
         }
 
-        /* ---------- Shared empty / "not found" state ---------- */
+        
         .empty-state {
             background: var(--color-white);
             border: 1px dashed var(--color-border);
@@ -221,7 +200,7 @@
         .empty-state p { color: var(--color-muted); max-width: 440px; }
         .empty-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 12px; }
 
-        /* ---------- Shared formatted text (descriptions + documentation) ---------- */
+        
         .formatted-text p { margin-bottom: 13px; }
         .formatted-text p:last-child { margin-bottom: 0; }
         .formatted-text ul { margin: 0 0 13px 22px; padding: 0; }
@@ -237,9 +216,7 @@
             color: var(--color-blue-dark);
         }
 
-        /* ============================================================
-           HEADER / NAVIGATION
-           ============================================================ */
+        
         .site-header {
             position: sticky;
             top: 0;
@@ -265,8 +242,7 @@
             letter-spacing: 0.01em;
         }
         .brand:hover { color: var(--color-white); text-decoration: none; }
-        /* Your logo image (siteConfig.logo). Falls back to a simple icon
-           if no logo is configured. */
+        
         .brand-logo {
             width: 34px; height: 34px;
             border-radius: 5px;
@@ -299,7 +275,7 @@
         .nav-link:hover { color: var(--color-white); background: rgba(255, 255, 255, 0.08); text-decoration: none; }
         .nav-link.active { color: var(--color-white); background: var(--color-blue); }
 
-        /* Mobile menu toggle (hidden on desktop) */
+        
         .menu-toggle {
             display: none;
             flex-direction: column;
@@ -323,19 +299,13 @@
         .site-header.nav-open .menu-toggle span:nth-child(2) { opacity: 0; }
         .site-header.nav-open .menu-toggle span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
-        /* ============================================================
-           HERO (compact, flat navy, slanted bottom edge)
-           ============================================================
-           No gradient, no decorative circles. One primary CTA, a short
-           accent bar under the slogan, and a slanted bottom edge are
-           the only flourishes. */
+        
         .hero {
             position: relative;
             background: var(--color-navy);
             color: var(--color-white);
             padding: 56px 0 78px;
-            /* Slanted bottom edge: a small piece of asymmetry instead of
-               the usual straight banner line. */
+            
             clip-path: polygon(0 0, 100% 0, 100% 100%, 0 calc(100% - 24px));
         }
 
@@ -353,7 +323,7 @@
             color: var(--color-blue-bright);
             margin-bottom: 14px;
         }
-        /* Short hand-placed accent bar instead of decoration */
+        
         .hero-slogan::after {
             content: "";
             display: block;
@@ -363,7 +333,7 @@
             margin-top: 12px;
         }
         .hero-text { max-width: 640px; color: rgba(255, 255, 255, 0.82); font-size: 1rem; }
-        /* The single primary call to action of the hero */
+        
         .hero-actions {
             display: flex;
             flex-wrap: wrap;
@@ -371,11 +341,7 @@
             margin-top: 22px;
         }
 
-        /* ============================================================
-           HOMEPAGE SECTIONS
-           ============================================================
-           Section paddings intentionally vary: the page speeds up and
-           slows down as you scroll instead of keeping one rhythm. */
+        
         .section { padding: 76px 0; }
         .featured-section { padding: 64px 0; }
         .categories-section { padding: 48px 0 72px; }
@@ -390,13 +356,12 @@
         .section-title { font-size: clamp(1.55rem, 3vw, 2rem); margin-bottom: 10px; }
         .section-text { color: var(--color-muted); font-size: 1.02rem; }
 
-        /* Section header row with an optional link on the right */
+        
         .section-row { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; margin-bottom: 36px; }
         .section-row .section-header { margin-bottom: 0; }
         .section-link { font-weight: 600; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; }
 
-        /* --- About & Why side by side (pure text, slightly unequal
-             columns for a hand-set feel) --- */
+        
         .about-why-grid {
             display: grid;
             grid-template-columns: 1.25fr 1px 1fr;
@@ -410,7 +375,7 @@
         .why-point:last-child { margin-bottom: 0; }
         .why-point strong { color: var(--color-navy); }
 
-        /* --- Discord section --- */
+        
         .discord-section {
             background: linear-gradient(130deg, var(--color-navy) 0%, var(--color-navy-soft) 100%);
             color: var(--color-white);
@@ -418,7 +383,7 @@
         .discord-grid { display: grid; grid-template-columns: 1.6fr 1fr; gap: 56px; align-items: center; }
         .discord-section .section-title { color: var(--color-white); }
         .discord-section .section-text { color: rgba(255, 255, 255, 0.78); }
-        /* Plain text items with a thin accent rule: no checkmark icons */
+        
         .discord-points {
             list-style: none;
             padding: 0;
@@ -446,9 +411,7 @@
         }
         .discord-cta-note { font-size: 0.88rem; color: rgba(255, 255, 255, 0.65); }
 
-        /* ============================================================
-           CATEGORY BROWSER (index-style rows, not cards)
-           ============================================================ */
+        
         .category-list { border-top: 1px solid var(--color-border); }
         .category-row {
             display: flex;
@@ -474,9 +437,7 @@
         .category-row-count { font-size: 0.78rem; font-weight: 600; color: var(--color-muted); }
         .category-row-desc { flex-basis: 55%; color: var(--color-muted); font-size: 0.88rem; text-align: right; }
 
-        /* ============================================================
-           SEARCH / FILTERS (Assets catalog page)
-           ============================================================ */
+        
         .page-header { padding: 60px 0 8px; }
 
         .catalog-layout {
@@ -487,7 +448,7 @@
             padding: 28px 0 88px;
         }
 
-        /* Filter panel (sidebar on desktop, collapsible on mobile) */
+        
         .filter-panel {
             background: var(--color-white);
             border: 1px solid var(--color-border);
@@ -527,7 +488,7 @@
         }
         #clearFiltersBtn { margin-top: 20px; }
 
-        /* Filter chips */
+        
         .chip-list { display: flex; flex-wrap: wrap; gap: 8px; }
         .chip {
             padding: 6px 13px;
@@ -545,10 +506,10 @@
         .chip.active { background: var(--color-blue); border-color: var(--color-blue); color: var(--color-white); }
         .chip.active:hover { background: var(--color-blue-dark); border-color: var(--color-blue-dark); color: var(--color-white); }
 
-        /* Mobile filter toggle (hidden on desktop) */
+        
         .filters-toggle { display: none; }
 
-        /* Results toolbar: count + active filter chips */
+        
         .catalog-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 20px; }
         .result-count { font-weight: 700; color: var(--color-navy); margin-right: auto; font-size: 0.95rem; }
         .active-filters { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
@@ -578,9 +539,7 @@
         }
         .remove-filter:hover { background: rgba(47, 111, 219, 0.18); }
 
-        /* ============================================================
-           ASSET GRID
-           ============================================================ */
+        
         .asset-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(min(262px, 100%), 1fr));
@@ -588,9 +547,7 @@
         }
         .asset-grid > .empty-state { grid-column: 1 / -1; }
 
-        /* ============================================================
-           ASSET CARDS
-           ============================================================ */
+        
         .asset-card {
             display: flex;
             flex-direction: column;
@@ -602,8 +559,7 @@
         }
         .asset-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); border-color: #c6d4ec; }
 
-        /* Flagship card: the first featured asset renders wide, media
-           beside content, instead of another even card in the grid. */
+        
         .asset-card-horizontal { grid-column: 1 / -1; flex-direction: row; }
         .asset-card-horizontal .card-media {
             flex: 0 0 52%;
@@ -613,7 +569,7 @@
         .asset-card-horizontal .media-frame { aspect-ratio: auto; height: 100%; min-height: 250px; }
         .asset-card-horizontal .card-body { padding: 22px 26px; }
 
-        /* Media area (shared by cards and the asset detail page) */
+        
         .media-frame {
             position: relative;
             aspect-ratio: 16 / 9;
@@ -659,7 +615,7 @@
         .card-title a:hover { color: var(--color-blue); text-decoration: none; }
         .card-desc { font-size: 0.88rem; color: var(--color-muted); line-height: 1.55; }
         .card-tags { display: flex; flex-wrap: wrap; gap: 6px; }
-        /* Square pills: sharp contrast against the rounded cards */
+        
         .tag-pill {
             display: inline-block;
             font-size: 0.72rem;
@@ -681,7 +637,7 @@
             padding-top: 13px;
             border-top: 1px solid var(--color-border);
         }
-        /* Price display (with optional sale treatment) */
+        
         .card-price { font-size: 1.06rem; font-weight: 700; color: var(--color-navy); }
         .card-price.is-free { color: var(--color-blue); }
         .card-price-group { display: flex; flex-direction: column; align-items: flex-start; gap: 1px; }
@@ -693,9 +649,7 @@
             font-weight: 600;
         }
 
-        /* ============================================================
-           ASSET DETAIL PAGE
-           ============================================================ */
+        
         .detail-page { padding: 44px 0 88px; }
         .detail-top { margin-bottom: 22px; }
         .back-link { display: inline-flex; align-items: center; gap: 7px; font-weight: 600; }
@@ -757,9 +711,7 @@
         .detail-about { margin-top: 44px; max-width: 780px; }
         .detail-about h2 { font-size: 1.45rem; margin-bottom: 16px; }
 
-        /* ============================================================
-           DOCUMENTATION
-           ============================================================ */
+        
         .docs-page { padding: 44px 0 88px; }
 
         .breadcrumb {
@@ -795,7 +747,7 @@
         .docs-layout.no-toc { grid-template-columns: minmax(0, 1fr); }
         .docs-layout.no-toc .docs-content { max-width: 780px; }
 
-        /* Table of contents */
+        
         .docs-toc {
             position: sticky;
             top: calc(var(--header-height) + 24px);
@@ -816,12 +768,12 @@
         .docs-toc a { display: block; padding: 5px 9px; border-radius: var(--radius-sm); color: var(--color-muted); font-size: 0.87rem; line-height: 1.4; }
         .docs-toc a:hover { background: var(--color-blue-soft); color: var(--color-blue); text-decoration: none; }
 
-        /* Documentation content blocks */
+        
         .doc-section { margin-bottom: 40px; scroll-margin-top: 88px; }
         .doc-section:last-child { margin-bottom: 0; }
         .doc-section-title { font-size: 1.28rem; margin: 0 0 12px; }
 
-        /* Note / callout blocks */
+        
         .doc-note {
             background: var(--color-blue-soft);
             border: 1px solid #ccddf7;
@@ -832,7 +784,7 @@
         }
         .doc-note-title { display: block; font-weight: 700; color: var(--color-navy); margin-bottom: 4px; }
 
-        /* Code blocks */
+        
         .code-block {
             background: var(--color-navy-deep);
             border: 1px solid #27395d;
@@ -882,9 +834,7 @@
             white-space: pre;
         }
 
-        /* ============================================================
-           CHANGELOG PAGE
-           ============================================================ */
+        
         .changelog-page { padding: 44px 0 88px; }
         .changelog-list { max-width: 780px; }
 
@@ -916,9 +866,7 @@
         }
         .changelog-date { color: var(--color-muted); font-size: 0.88rem; }
 
-        /* ============================================================
-           CONTACT PAGE
-           ============================================================ */
+        
         .contact-page { padding-bottom: 88px; }
         .contact-grid {
             display: grid;
@@ -951,7 +899,7 @@
         }
         .contact-topics { margin-top: 48px; }
         .contact-topics h2 { font-size: 1.3rem; margin-bottom: 8px; }
-        /* Plain bulleted list, no icons */
+        
         .topics-list {
             list-style: disc;
             margin: 18px 0 0 24px;
@@ -960,9 +908,7 @@
         .topics-list li { margin-bottom: 8px; }
         .topics-list li:last-child { margin-bottom: 0; }
 
-        /* ============================================================
-           FOOTER
-           ============================================================ */
+        
         .site-footer { background: var(--color-navy-deep); color: rgba(255, 255, 255, 0.72); }
         .footer-grid { display: grid; grid-template-columns: 1.7fr 1fr 1fr; gap: 44px; padding: 60px 0 44px; }
         .footer-brand .brand { margin-bottom: 12px; }
@@ -986,11 +932,9 @@
             color: rgba(255, 255, 255, 0.45);
         }
 
-        /* ============================================================
-           RESPONSIVE DESIGN
-           ============================================================ */
+        
 
-        /* --- Tablet / small desktop --- */
+        
         @media (max-width: 1000px) {
             .discord-grid { grid-template-columns: 1fr; gap: 36px; }
             .about-why-grid { grid-template-columns: 1fr; }
@@ -1002,13 +946,13 @@
             .discord-points { grid-template-columns: 1fr; }
         }
 
-        /* Category rows stack their description on narrow screens */
+        
         @media (max-width: 720px) {
             .category-row { flex-direction: column; align-items: flex-start; gap: 2px; }
             .category-row-desc { flex-basis: auto; text-align: left; }
         }
 
-        /* --- Catalog collapses to one column with a collapsible filter panel --- */
+        
         @media (max-width: 920px) {
             .catalog-layout { grid-template-columns: 1fr; }
             .filter-panel { position: static; max-height: none; display: none; }
@@ -1016,7 +960,7 @@
             .filters-toggle { display: inline-flex; }
         }
 
-        /* --- Mobile navigation --- */
+        
         @media (max-width: 860px) {
             .menu-toggle { display: flex; }
             .main-nav {
@@ -1036,21 +980,21 @@
             .nav-link { padding: 12px 14px; font-size: 1rem; }
         }
 
-        /* --- Phones --- */
+        
         @media (max-width: 640px) {
             .container { padding: 0 18px; }
             .hero { padding: 40px 0 60px; }
             .section { padding: 56px 0; }
             .featured-section { padding: 48px 0; }
             .categories-section { padding: 40px 0 56px; }
-            /* Hero CTA becomes a comfortable full-width tap target */
+            
             .hero-actions .btn { flex: 1; }
             .section-row { flex-direction: column; align-items: flex-start; gap: 10px; }
             .footer-grid { grid-template-columns: 1fr; gap: 34px; padding: 48px 0 36px; }
             .detail-meta-list .meta-key { min-width: 104px; }
             .purchase-price { font-size: 1.7rem; }
             .page-header { padding-top: 48px; }
-            /* Flagship card stacks vertically on phones */
+            
             .asset-card-horizontal { flex-direction: column; }
             .asset-card-horizontal .card-media {
                 flex: none;
@@ -1061,13 +1005,13 @@
             .asset-card-horizontal .card-body { padding: 16px 18px 18px; }
         }
 
-        /* Panel open animation (mobile menu + mobile filters) */
+        
         @keyframes panelOpen {
             from { opacity: 0; transform: translateY(-6px); }
             to   { opacity: 1; transform: none; }
         }
 
-        /* Respect users who prefer less motion */
+        
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after { animation: none !important; transition: none !important; }
         }
