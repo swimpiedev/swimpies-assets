@@ -2,7 +2,7 @@
     siteName: "Swimpie's Assets",
     slogan: "Cut Dev Time. Not Your Budget.",
     logo: "images/icon.png",
-    currency: "$‚-",
+    currency: "$",
     links: {
         unityPublisher: "YOUR UNITY PUBLISHER PROFILE URL",
         itchProfile: "YOUR ITCH.IO PROFILE URL",
