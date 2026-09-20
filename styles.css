@@ -29,7 +29,9 @@
     --container-max: 1120px;
 }
 
-* { box-sizing: border-box; }
+* { 
+    box-sizing: border-box; 
+}
 
 body {
     margin: 0;
@@ -1322,6 +1324,51 @@ a.tag-pill:hover {
     margin-bottom: 4px; 
 }
 
+.doc-item-title {
+    font-size: 1.02rem;
+    margin: 26px 0 0;
+}
+
+.doc-section-title + .doc-item-title {
+    margin-top: 0;
+}
+
+.doc-item-title + .code-block {
+    margin-top: 10px;
+}
+
+.doc-section > .formatted-text + .formatted-text {
+    margin-top: 13px;
+}
+
+.doc-note code {
+    font-family: var(--font-mono);
+    font-size: 0.86em;
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(20, 33, 58, 0.12);
+    border-radius: var(--radius-sm);
+    padding: 1px 6px;
+    color: var(--color-navy);
+}
+
+.doc-note-tip {
+    background: #eaf7ef;
+    border-color: #c5e7d1;
+    border-left-color: #2f9e5b;
+}
+
+.doc-note-warning {
+    background: #fff6e5;
+    border-color: #f5dfae;
+    border-left-color: #d98f0b;
+}
+
+.doc-note-danger {
+    background: #fdeeee;
+    border-color: #f3c9c9;
+    border-left-color: var(--color-sale);
+}
+
 .code-block {
     background: var(--color-navy-deep);
     border: 1px solid #27395d;
@@ -1385,6 +1432,34 @@ a.tag-pill:hover {
     line-height: 1.65;
     color: #d9e3f5;
     white-space: pre;
+}
+
+.tok-comment  { 
+    color: #7f8fab; font-style: italic; 
+}
+
+.tok-keyword  { 
+    color: #82aaff; 
+}
+
+.tok-string   { 
+    color: #a5df9f; 
+}
+
+.tok-number   { 
+    color: #f4b978; 
+}
+
+.tok-type     { 
+    color: #5fd3c4; 
+}
+
+.tok-function { 
+    color: #f2d48a; 
+}
+
+.tok-key      { 
+    color: #c3a6ff; 
 }
 
 .changelog-page { 

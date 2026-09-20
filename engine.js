@@ -249,6 +249,95 @@ function getLanguageLabel(language) {
     return LANGUAGE_LABELS[String(language).toLowerCase()] || escapeHtml(language);
 }
 
+var TOKEN_COMMENT_C = /\/\/[^\n]*|\/\*[\s\S]*?\*\//;
+var TOKEN_COMMENT_HASH = /#[^\n]*/;
+var TOKEN_COMMENT_NONE = /(?!)/;
+var TOKEN_STRING = /[$@]{0,2}"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*'|`(?:\\.|[^`\\])*`/;
+var TOKEN_NUMBER = /0[xX][0-9a-fA-F_]+|\d[\d_]*(?:\.\d+)?(?:[eE][+-]?\d+)?[fFdDmMuUlL]{0,2}/;
+var TOKEN_WORD = /[A-Za-z_]\w*/;
+
+var SYNTAX_LANGUAGES = {
+    csharp: {
+        comment: TOKEN_COMMENT_C,
+        keywords: "abstract as async await base bool break byte case catch char checked class const continue decimal default delegate do double else enum event explicit extern false finally fixed float for foreach get goto if implicit in init int interface internal is lock long namespace new null object operator out override params partial private protected public readonly record ref return sbyte sealed set short sizeof static string struct switch this throw true try typeof uint ulong unchecked unsafe ushort using var virtual void volatile when where while yield"
+    },
+    js: {
+        comment: TOKEN_COMMENT_C,
+        keywords: "abstract as async await break case catch class const continue debugger default delete do else enum export extends false finally for from function if implements import in instanceof interface let new null of private protected public readonly return static super switch this throw true try type typeof undefined var void while with yield"
+    },
+    json: {
+        comment: TOKEN_COMMENT_NONE,
+        keywords: "true false null",
+        keys: true
+    },
+    bash: {
+        comment: TOKEN_COMMENT_HASH,
+        keywords: "if then else elif fi for while do done case esac in function return exit local export"
+    }
+};
+
+var SYNTAX_ALIASES = {
+    "csharp": "csharp", "cs": "csharp", "c#": "csharp",
+    "javascript": "js", "js": "js", "typescript": "js", "ts": "js",
+    "json": "json",
+    "bash": "bash", "shell": "bash", "sh": "bash"
+};
+
+function getSyntaxLanguage(name) {
+    var key = SYNTAX_ALIASES[String(name || "").toLowerCase()];
+    var def = key ? SYNTAX_LANGUAGES[key] : null;
+
+    if (def && !def.regex) {
+        def.regex = new RegExp(
+            "(" + def.comment.source + ")|(" + TOKEN_STRING.source + ")|(" +
+            TOKEN_NUMBER.source + ")|(" + TOKEN_WORD.source + ")", "g");
+        def.keywordMap = {};
+        def.keywords.split(" ").forEach(function (word) { def.keywordMap[word] = true; });
+    }
+
+    return def;
+}
+
+function highlightCode(code, language) {
+    var def = getSyntaxLanguage(language);
+    if (!def) return escapeHtml(code);
+
+    var regex = def.regex;
+    var out = "";
+    var last = 0;
+    var match;
+
+    regex.lastIndex = 0;
+
+    while ((match = regex.exec(code)) !== null) {
+        var text = match[0];
+        var end = match.index + text.length;
+        var type = null;
+
+        if (match[1]) {
+            type = "comment";
+        } else if (match[2]) {
+            type = (def.keys && /^\s*:/.test(code.slice(end, end + 20))) ? "key" : "string";
+        } else if (match[3]) {
+            type = "number";
+        } else if (Object.prototype.hasOwnProperty.call(def.keywordMap, text)) {
+            type = "keyword";
+        } else if (code.charAt(end) === "(") {
+            type = "function";
+        } else if (code.charAt(match.index - 1) !== "." && /^[A-Z]/.test(text)) {
+            type = "type";
+        }
+
+        out += escapeHtml(code.slice(last, match.index));
+        out += type
+            ? '<span class="tok-' + type + '">' + escapeHtml(text) + "</span>"
+            : escapeHtml(text);
+        last = end;
+    }
+
+    return out + escapeHtml(code.slice(last));
+}
+
 function pageUrl(page) {
     return "#page=" + page;
 }
@@ -984,39 +1073,74 @@ function renderAssetDetailPage(container, asset) {
         "</div>";
 }
 
-function renderDocBlock(block, index) {
-    if (!block || !block.type) return "";
+function normalizeCode(code) {
+    var text = Array.isArray(code) ? code.join("\n") : String(code || "");
+    return text
+        .replace(/\r\n?/g, "\n")
+        .replace(/^\s*\n/, "")   // drop leading blank lines
+        .replace(/\s+$/, "");    // drop trailing whitespace
+}
 
-    var anchorOpen = '<section class="doc-section" id="doc-section-' + index + '">';
+function renderDocCode(item) {
+    return '<div class="code-block">' +
+            '<div class="code-block-header">' +
+                '<span class="code-language">' + escapeHtml(getLanguageLabel(item.language)) + "</span>" +
+                '<button type="button" class="copy-btn">' + icon("copy", 13) + " Copy</button>" +
+            "</div>" +
+            "<pre><code>" + highlightCode(normalizeCode(item.code), item.language) + "</code></pre>" +
+        "</div>";
+}
+
+function renderDocNote(item) {
+    var variant = /^[a-z-]+$/i.test(item.variant || "") ? " doc-note-" + item.variant.toLowerCase() : "";
+    return '<div class="doc-note' + variant + '">' +
+            (item.title ? '<strong class="doc-note-title">' + escapeHtml(item.title) + "</strong>" : "") +
+            '<div class="formatted-text">' + formatDocText(item.content) + "</div>" +
+        "</div>";
+}
+
+// Renders one item inside a section: a string (text) or a {type: ...} object.
+function renderDocItem(item) {
+    if (item === null || item === undefined) return "";
+    if (typeof item === "string") {
+        return '<div class="formatted-text">' + formatDocText(item) + "</div>";
+    }
+
+    var caption = item.title
+        ? '<h3 class="doc-item-title">' + escapeHtml(item.title) + "</h3>"
+        : "";
+
+    if (item.type === "code") return caption + renderDocCode(item);
+    if (item.type === "note") return renderDocNote(item);
+
+    return caption + '<div class="formatted-text">' + formatDocText(item.content) + "</div>";
+}
+
+function renderDocBlock(block, index) {
+    if (!block) return "";
+
+    var html = '<section class="doc-section" id="doc-section-' + index + '">';
+    var heading = block.title
+        ? '<h2 class="doc-section-title">' + escapeHtml(block.title) + "</h2>"
+        : "";
 
     if (block.type === "code") {
-        return anchorOpen +
-            (block.title ? '<h2 class="doc-section-title">' + escapeHtml(block.title) + "</h2>" : "") +
-            '<div class="code-block">' +
-                '<div class="code-block-header">' +
-                    '<span class="code-language">' + escapeHtml(getLanguageLabel(block.language)) + "</span>" +
-                    '<button type="button" class="copy-btn">' + icon("copy", 13) + " Copy</button>" +
-                "</div>" +
-                "<pre><code>" + escapeHtml(block.code || "") + "</code></pre>" +
-            "</div>" +
-        "</section>";
+        // Legacy top-level code block: the title is the section heading.
+        html += heading + renderDocCode(block);
+    } else if (block.type === "note") {
+        // Legacy top-level note: the title lives inside the note.
+        html += renderDocNote(block);
+    } else {
+        // Text section. `content` may be a string or an array of items.
+        html += heading;
+        if (Array.isArray(block.content)) {
+            html += block.content.map(renderDocItem).join("");
+        } else {
+            html += renderDocItem(block.content);
+        }
     }
 
-    if (block.type === "note") {
-        return anchorOpen +
-            '<div class="doc-note">' +
-                (block.title
-                    ? '<strong class="doc-note-title">' + escapeHtml(block.title) + "</strong>"
-                    : "") +
-                '<div class="formatted-text">' + formatDocText(block.content) + "</div>" +
-            "</div>" +
-        "</section>";
-    }
-
-    return anchorOpen +
-        (block.title ? '<h2 class="doc-section-title">' + escapeHtml(block.title) + "</h2>" : "") +
-        '<div class="formatted-text">' + formatDocText(block.content) + "</div>" +
-    "</section>";
+    return html + "</section>";
 }
 
 function renderDocumentationPage(container, asset) {
@@ -1046,7 +1170,7 @@ function renderDocumentationPage(container, asset) {
         blocksHtml += renderDocBlock(block, index);
     });
     
-    var showToc = tocEntries.length >= 4;
+    var showToc = tocEntries.length >= 3;
     var tocHtml = showToc
         ? '<nav class="docs-toc" aria-label="Documentation sections">' +
                 '<h2 class="docs-toc-title">On this page</h2><ul>' +

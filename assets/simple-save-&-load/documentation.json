@@ -1,1 +1,656 @@
-[{"type":"text","title":"Overview","content":"Example Inventory System is a demo asset that ships with this website template. It exists to show how a complete product page looks, including working documentation with copyable code examples.\n\nThe code samples below use an imaginary `ExampleInventory` component. When you write your own documentation, replace them with your asset's real API and usage examples."},{"type":"text","title":"Requirements","content":"This section is where you'd list everything users need before installing your asset, for example the minimum Unity version, supported render pipelines, or other packages yours depends on.\n\nThe demo asset itself has no requirements: it's placeholder content, so there's nothing to install."},{"type":"text","title":"Installation","content":"Describe how to install your asset here. Most Unity assets are installed in one of two ways:\n\n- Import the package from your Unity Asset Store library (Window > Package Manager > My Assets).\n- Or download the package from itch.io and import the .unitypackage via Assets > Import Package.\n\nIf your asset needs extra steps, such as scene setup, layers or define symbols, a separate Setup section like the one below is a good place for them."},{"type":"text","title":"Setup","content":"Explain the first steps after installation. For this demo, imagine the system needs a single component on a GameObject:\n\n- Create an empty GameObject, for example `InventoryHolder`.\n- Add the `ExampleInventory` component to it.\n- Set the number of slots in the Inspector.\n- Call `Initialize` from your own code before using the inventory."},{"type":"code","title":"Basic Usage","language":"csharp","code":"\r\nusing UnityEngine;\r\n\r\npublic class DemoUsage : MonoBehaviour\r\n{\r\n    private void Start()\r\n    {\r\n        // Get the ExampleInventory component on this GameObject.\r\n        var inventory = GetComponent<ExampleInventory>();\r\n\r\n        // Initialize the inventory with 20 slots.\r\n        inventory.Initialize(20);\r\n\r\n        // Add and count items.\r\n        inventory.AddItem(\"sword\", 2);\r\n        Debug.Log(\"Swords: \" + inventory.CountItem(\"sword\"));\r\n    }\r\n}\r\n"},{"type":"text","title":"Working With Items","content":"The inventory exposes a small API for the most common item operations. All modifying methods return a `bool`, so you can react when an operation fails, for example when the inventory is full.\n\n- `AddItem(itemId, amount)` adds items and returns false if there is no room.\n- `RemoveItem(itemId, amount)` removes items and returns false if there aren't enough.\n- `CountItem(itemId)` returns how many items of that type are stored.\n- `Clear()` empties the whole inventory."},{"type":"code","title":"Adding and Removing Items","language":"csharp","code":"\r\nif (inventory.AddItem(\"sword\", 2))\r\n{\r\n    Debug.Log(\"Added 2 swords.\");\r\n}\r\n\r\nif (inventory.RemoveItem(\"sword\", 1))\r\n{\r\n    Debug.Log(\"Removed 1 sword.\");\r\n}\r\n\r\nDebug.Log(\"Swords left: \" + inventory.CountItem(\"sword\"));\r\n"},{"type":"code","title":"Listening to Inventory Events","language":"csharp","code":"\r\nusing UnityEngine;\r\n\r\npublic class InventoryEvents : MonoBehaviour\r\n{\r\n    private void OnEnable()\r\n    {\r\n        ExampleInventory.OnItemAdded += HandleItemAdded;\r\n        ExampleInventory.OnItemRemoved += HandleItemRemoved;\r\n    }\r\n\r\n    private void OnDisable()\r\n    {\r\n        ExampleInventory.OnItemAdded -= HandleItemAdded;\r\n        ExampleInventory.OnItemRemoved -= HandleItemRemoved;\r\n    }\r\n\r\n    private void HandleItemAdded(string itemId, int amount)\r\n    {\r\n        Debug.Log(\"Added \" + amount + \"x \" + itemId + \".\");\r\n    }\r\n\r\n    private void HandleItemRemoved(string itemId, int amount)\r\n    {\r\n        Debug.Log(\"Removed \" + amount + \"x \" + itemId + \".\");\r\n    }\r\n}\r\n"},{"type":"note","title":"Note","content":"Remember to unsubscribe from static events in `OnDisable`, as shown above. Otherwise you risk keeping references to destroyed objects alive."},{"type":"text","title":"Troubleshooting","content":"A short list of common problems and their fixes works well here:\n\n- **Nothing happens when I call AddItem:** make sure you called `Initialize` first.\n- **Events fire twice:** the event was probably subscribed twice. Subscribe in `OnEnable` and unsubscribe in `OnDisable`.\n- **Items disappear between scenes:** the inventory does not persist by default, so save its contents yourself."}]
+[
+    {
+        "title": "Installation",
+        "content": [
+            "The package is organized like this:",
+            {
+                "type": "code",
+                "language": "text",
+                "title": "Folder structure",
+                "code": [
+                    "Editor/",
+                    "    SaveSystemEditorWindow.cs",
+                    "    AutoSaveManagerEditor.cs",
+                    "    Swimpie.SimpleSaveLoad.Editor.asmdef",
+                    "",
+                    "Runtime/",
+                    "    AESEncryption.cs",
+                    "    ISaveStorage.cs",
+                    "    SimpleSaveLoad.cs",
+                    "    CompressionHelper.cs",
+                    "    AutoSaveManager.cs",
+                    "    Swimpie.SimpleSaveLoad.Runtime.asmdef",
+                    "",
+                    "    Types/",
+                    "        CollectionTypes.cs",
+                    "        GameObjectSaveData.cs",
+                    "        SaveTypes.cs"
+                ]
+            },
+            "Drop the whole folder into your project (e.g. under `Assets/` or `Packages/`). If you're using Unity's Package Manager with a local/git package, point it at the folder containing these subfolders.",
+            "There's nothing to configure and no setup wizard. Once the scripts are in your project, the package is ready to use."
+        ]
+    },
+    {
+        "title": "Initial Setup",
+        "content": [
+            "There is no manager object you need to place in your scene to start saving and loading data. The core system, `SimpleSaveLoad`, is a static class and it's always available, from any script, the moment the package is imported.",
+            "The only thing you can place in a scene is the optional `AutoSaveManager` component, covered later in this guide."
+        ]
+    },
+    {
+        "title": "Swimpie.SimpleSaveLoad",
+        "content": [
+            "Everything lives in the `Swimpie.SimpleSaveLoad` namespace. Add this to the top of any script that needs to save or load data:",
+            {
+                "type": "code",
+                "language": "csharp",
+                "title": "Namespace",
+                "code": [
+                    "using Swimpie.SimpleSaveLoad;"
+                ]
+            },
+            "The main thing you'll use is the static class `SimpleSaveLoad` itself:",
+            {
+                "type": "code",
+                "language": "csharp",
+                "title": "Your first save and load",
+                "code": [
+                    "SimpleSaveLoad.SetData(\"Gold\", 500);",
+                    "int gold = SimpleSaveLoad.GetData<int>(\"Gold\");"
+                ]
+            },
+            "That's the whole mental model in two lines: `SetData` writes something under a name, `GetData` reads it back. Everything else in this guide is refinement on top of that idea."
+        ]
+    },
+    {
+        "title": "Basic Concepts",
+        "content": [
+            "Before diving into the API, it helps to understand what's actually happening under the hood.",
+            "**Keys.** Every piece of saved data is identified by a key, just a string, like `\"Gold\"`, `\"PlayerPosition\"`, or `\"Inventory\"`. Think of a key as a filename. In fact, that's almost exactly what it becomes: by default, each key turns into its own `.json` file on disk, inside Unity's `Application.persistentDataPath`.",
+            "**The pipeline.** When you call `SetData`, your data goes through a small pipeline before it's written:",
+            {
+                "type": "code",
+                "language": "text",
+                "title": "Save pipeline",
+                "code": [
+                    "your data -> serialize to JSON -> (optional) compress -> (optional) encrypt -> write"
+                ]
+            },
+            "`GetData` runs the same pipeline in reverse:",
+            {
+                "type": "code",
+                "language": "text",
+                "title": "Load pipeline",
+                "code": [
+                    "read -> (optional) decrypt -> (optional) decompress -> deserialize from JSON -> your data"
+                ]
+            },
+            "You control the optional steps with parameters (`compress`, `encryptionKey`) covered later in this guide. The important thing to internalize now is the order: compression always happens before encryption, and decompression always happens after decryption. This matters because encrypted data looks like random noise, and random noise doesn't compress. So compressing first, while the data still has real structure, is the only order that makes sense.",
+            "**Serialization.** Unity's built-in `JsonUtility` does the actual JSON conversion. `JsonUtility` is fast and simple, but it has a few quirks. For example, it can't serialize a bare number or a `Dictionary` directly. Part of what this package does is quietly work around those quirks (via small wrapper/surrogate types) so you never have to think about them.",
+            "**Storage providers.** Where the final bytes actually end up is controlled by a `StorageProvider`, an object implementing the `ISaveStorage` interface. By default this is `LocalDiskStorage`, which writes to local disk. You can swap this out for your own backend (cloud save, a server, etc.) covered later in this guide."
+        ]
+    },
+    {
+        "title": "Saving & Loading Using Keys",
+        "content": [
+            "The two workhorse methods:",
+            {
+                "type": "code",
+                "language": "csharp",
+                "title": "Signatures",
+                "code": [
+                    "SimpleSaveLoad.SetData<T>(string key, T data, ...);",
+                    "T SimpleSaveLoad.GetData<T>(string key, T defaultValue = default, ...);"
+                ]
+            },
+            "A simple example:",
+            {
+                "type": "code",
+                "language": "csharp",
+                "title": "Save and load a value",
+                "code": [
+                    "SimpleSaveLoad.SetData(\"Gold\", 500);",
+                    "int gold = SimpleSaveLoad.GetData<int>(\"Gold\");"
+                ]
+            },
+            "`GetData` takes a `defaultValue`. This is what you get back if the key has never been saved. For example, the first time a player ever launches your game:",
+            {
+                "type": "code",
+                "language": "csharp",
+                "title": "Providing a default",
+                "code": [
+                    "// If \"Gold\" was never saved, this returns 0 instead of throwing.",
+                    "int gold = SimpleSaveLoad.GetData(\"Gold\", defaultValue: 0);"
+                ]
+            },
+            "If you don't pass one, you get `default(T)` which is `0` for numbers, `null` for reference types, an all-zero struct for something like `Vector3`.",
+            "See `CheckpointSaverExample.cs` for a complete, tiny example of save/load by key using a `Vector3` checkpoint:",
+            {
+                "type": "code",
+                "language": "csharp",
+                "title": "CheckpointSaverExample.cs (excerpt)",
+                "code": [
+                    "public Vector3 Checkpoint { get; private set; } = Vector3.zero;",
+                    "",
+                    "private void Start()",
+                    "{",
+                    "    Checkpoint = SimpleSaveLoad.GetData<Vector3>(CheckpointKey);",
+                    "}",
+                    "",
+                    "public void ChangeCheckpoint(Vector3 newCheckpoint)",
+                    "{",
+                    "    Checkpoint = newCheckpoint;",
+                    "    SimpleSaveLoad.SetData(CheckpointKey, Checkpoint);",
+                    "}"
+                ]
+            },
+            "Notice there's no manual JSON conversion, no file paths, nothing Unity-specific to worry about. Just a key and a value."
+        ]
+    },
+    {
+        "title": "Checking If A Key Exists",
+        "content": [
+            "Sometimes you need to know whether something was saved before you try to load it. Most commonly, to tell a new player apart from a returning one.",
+            {
+                "type": "code",
+                "language": "csharp",
+                "title": "Exists",
+                "code": [
+                    "bool hasSave = SimpleSaveLoad.Exists(\"PlayerProgress\");"
+                ]
+            },
+            "A classic main menu pattern: only show a \"Continue\" button if a save actually exists.",
+            {
+                "type": "code",
+                "language": "csharp",
+                "title": "Continue vs New Game",
+                "code": [
+                    "if (SimpleSaveLoad.Exists(\"PlayerProgress\"))",
+                    "{",
+                    "    // show \"Continue\"",
+                    "}",
+                    "else",
+                    "{",
+                    "    // only show \"New Game\"",
+                    "}"
+                ]
+            },
+            "`AccountLogInExample.cs` uses `Exists` to decide between \"log in\" and \"create a new account\":",
+            {
+                "type": "code",
+                "language": "csharp",
+                "title": "AccountLogInExample.cs (excerpt)",
+                "code": [
+                    "if (SimpleSaveLoad.Exists(key))",
+                    "{",
+                    "    // returning account - check the password",
+                    "}",
+                    "else",
+                    "{",
+                    "    // first time - create it",
+                    "    SimpleSaveLoad.SetData(key, password, encryptionKey: EncryptionKey);",
+                    "}"
+                ]
+            },
+            "`Exists` also takes a `slot` parameter, covered in the Save Slots section."
+        ]
+    },
+    {
+        "title": "Deleting Keys",
+        "content": [
+            "Two levels of deletion:",
+            {
+                "type": "code",
+                "language": "csharp",
+                "title": "Delete and DeleteAll",
+                "code": [
+                    "// Delete one key. Returns false if there was nothing to delete.",
+                    "bool deleted = SimpleSaveLoad.Delete(\"PlayerProgress\");",
+                    "",
+                    "// Delete everything (optionally scoped to one slot).",
+                    "SimpleSaveLoad.DeleteAll();",
+                    "SimpleSaveLoad.DeleteAll(slot: \"Slot1\");"
+                ]
+            },
+            "`CharacterSlotsExample.cs` shows a `DeleteSlot` method that clears just one save slot:",
+            {
+                "type": "code",
+                "language": "csharp",
+                "title": "CharacterSlotsExample.cs (excerpt)",
+                "code": [
+                    "public void DeleteSlot(byte slot)",
+                    "{",
+                    "    bool deleted = SimpleSaveLoad.Delete(CharactersKey, slot: slot.ToString());",
+                    "    Debug.Log(deleted ? $\"Slot {slot} deleted.\" : $\"Slot {slot} had nothing to delete.\");",
+                    "}"
+                ]
+            },
+            {
+                "type": "note",
+                "variant": "warning",
+                "title": "DeleteAll with no slot",
+                "content": "With no slot specified, DeleteAll() deletes everything under Application.persistentDataPath, the entire save root, recursively. If your game only stores save data there, that's exactly what you want for a \"reset everything\" button. If you store other data in that same folder, be aware it will go too."
+            },
+            "Every delete also automatically removes that key's backup file (see the File Backups And Corruption Recovery section), there's nothing extra you need to do to clean those up."
+        ]
+    },
+    {
+        "title": "Complex Types",
+        "content": [
+            "This is where the package earns its keep. `SetData`/`GetData` aren't limited to simple values, they understand a wide range of types natively.",
+            "**Unity math/geometry types.** `Vector2`, `Vector3`, `Vector4`, `Quaternion`, `Color`, `Rect`, `Bounds` all work directly:",
+            {
+                "type": "code",
+                "language": "csharp",
+                "title": "Unity types",
+                "code": [
+                    "SimpleSaveLoad.SetData(\"PlayerPos\", transform.position);",
+                    "SimpleSaveLoad.SetData(\"SpawnArea\", myCollider.bounds);"
+                ]
+            },
+            "Under the hood, `JsonUtility` can't serialize these types at the root of a JSON document on its own, so the package quietly converts them to and from small internal \"surrogate\" structs. You never see this and never have to worry about it, you just save and load the type you actually have.",
+            "**Dates.**",
+            {
+                "type": "code",
+                "language": "csharp",
+                "title": "DateTime",
+                "code": [
+                    "SimpleSaveLoad.SetData(\"LastLogin\", DateTime.UtcNow);",
+                    "DateTime last = SimpleSaveLoad.GetData<DateTime>(\"LastLogin\");"
+                ]
+            },
+            "**Primitives, strings, enums.**",
+            {
+                "type": "code",
+                "language": "csharp",
+                "title": "Primitives and enums",
+                "code": [
+                    "SimpleSaveLoad.SetData(\"PlayerName\", \"Aria\");",
+                    "SimpleSaveLoad.SetData(\"Difficulty\", Difficulty.Hard);"
+                ]
+            },
+            "Same reasoning as above: `JsonUtility` can't serialize a bare `int`/`string`/`enum` at the root either, so these are automatically wrapped internally.",
+            "**Collections.** `List<T>`, arrays, 2D arrays, `Dictionary<K,V>`, `Stack<T>`, `Queue<T>`, `HashSet<T>`, and `LinkedList<T>` are all supported directly, pass the collection as-is:",
+            {
+                "type": "code",
+                "language": "csharp",
+                "title": "Collections",
+                "code": [
+                    "SimpleSaveLoad.SetData(\"HighScores\", new List<int> { 100, 250, 90 });",
+                    "SimpleSaveLoad.SetData(\"PlayerStats\", new Dictionary<string, int> { { \"STR\", 10 } });"
+                ]
+            },
+            "`InventorySaverExample.cs` demonstrates saving a `List<InventoryItem>`. Notice the important detail on the item type itself:",
+            {
+                "type": "code",
+                "language": "csharp",
+                "title": "InventoryItem",
+                "code": [
+                    "[System.Serializable]",
+                    "public struct InventoryItem",
+                    "{",
+                    "    public string Name;",
+                    "    public string Description;",
+                    "    public float Durability;",
+                    "    public bool Stackable;",
+                    "    // ...",
+                    "}"
+                ]
+            },
+            {
+                "type": "note",
+                "variant": "warning",
+                "title": "[System.Serializable] is not optional",
+                "content": "JsonUtility only serializes types explicitly marked with [System.Serializable]. Fields also need to be mutable (not readonly). JsonUtility writes loaded values directly into a type's fields, bypassing any constructor, and Unity's serializer skips readonly fields entirely. Skipping either of these will silently produce empty or missing data instead of an obvious error."
+            },
+            "**Your own classes and structs.** Any plain class or struct marked `[System.Serializable]` works the same way. Just save it directly, no wrapping needed.",
+            "**GameObjects.** `GameObject` gets its own convenience overloads, since a `GameObject` isn't really \"data\" in the same sense as everything above:",
+            {
+                "type": "code",
+                "language": "csharp",
+                "title": "Saving a GameObject",
+                "code": [
+                    "SimpleSaveLoad.SetData(\"Player\", playerGO);",
+                    "SimpleSaveLoad.LoadInto(\"Player\", playerGO);"
+                ]
+            },
+            "Two important differences from everything else in this section: there is no `GetData<GameObject>()`, since a `GameObject` can't be conjured out of nothing, someone has to have created or found the instance first. So instead of loading a new one, `LoadInto` applies the saved state (name, active state, position, rotation, scale) onto an instance you already have. Calling `GetData<GameObject>()` directly will throw a clear exception telling you to use `LoadInto` instead, rather than failing silently.",
+            "`GameObjectSaver.cs` shows this pattern (using the async versions, covered later in this guide):",
+            {
+                "type": "code",
+                "language": "csharp",
+                "title": "GameObjectSaver.cs (excerpt)",
+                "code": [
+                    "await SimpleSaveLoad.LoadIntoAsync(GameObjectKey, gameObject);",
+                    "// ...",
+                    "await SimpleSaveLoad.SetDataAsync(GameObjectKey, gameObject);"
+                ]
+            }
+        ]
+    },
+    {
+        "title": "Save Slots",
+        "content": [
+            "A slot is a named, isolated bucket for save data. Think \"Slot 1 / Slot 2 / Slot 3\" in a traditional save game menu, or separate save files per profile.",
+            {
+                "type": "code",
+                "language": "csharp",
+                "title": "Saving into a slot",
+                "code": [
+                    "SimpleSaveLoad.SetData(\"PlayerData\", data, slot: \"Slot1\");",
+                    "var loaded = SimpleSaveLoad.GetData<PlayerData>(\"PlayerData\", slot: \"Slot1\");"
+                ]
+            },
+            "This is the key thing to understand: the same key means completely different data in different slots. `\"PlayerData\"` in `\"Slot1\"` and `\"PlayerData\"` in `\"Slot2\"` never collide. Internally, the slot becomes part of the file path, so each slot effectively gets its own folder. You reuse the same key names across every slot without worrying about them overwriting each other.",
+            "`Exists`, `Delete`, and `DeleteAll` all accept the same `slot` parameter, letting you scope any operation to one slot:",
+            {
+                "type": "code",
+                "language": "csharp",
+                "title": "Slot-scoped operations",
+                "code": [
+                    "SimpleSaveLoad.Exists(\"PlayerData\", slot: \"Slot1\");",
+                    "SimpleSaveLoad.Delete(\"PlayerData\", slot: \"Slot1\");",
+                    "SimpleSaveLoad.DeleteAll(slot: \"Slot1\"); // wipes only Slot1"
+                ]
+            },
+            "`CharacterSlotsExample.cs` puts this together into a slot-select flow: check if a slot has data, load it if so, or create a default entry if not.",
+            "If you never pass a `slot`, everything goes into one shared un-slotted space, which is exactly what most games with a single save file want."
+        ]
+    },
+    {
+        "title": "Encryption",
+        "content": [
+            "Encryption scrambles your save data so it can't be casually read or edited. Most useful for anything a player might be tempted to tamper with, like currency or unlock flags.",
+            {
+                "type": "code",
+                "language": "csharp",
+                "title": "Encrypted save and load",
+                "code": [
+                    "SimpleSaveLoad.SetData(\"Gold\", 500, encryptionKey: \"MyEncryptionKey\");",
+                    "int gold = SimpleSaveLoad.GetData<int>(\"Gold\", encryptionKey: \"MyEncryptionKey\");"
+                ]
+            },
+            "The package uses AES-256 (via `AESEncryption`, `System.Security.Cryptography.Aes` under the hood). Whatever string you pass as `encryptionKey` is hashed (SHA-256) into a proper 256-bit key, so it can be any length. A fresh random IV (initialization vector) is generated for every single save and stored alongside the ciphertext. This means saving the exact same value twice produces two different-looking encrypted results, which is intentional and is what makes the encryption actually secure.",
+            {
+                "type": "note",
+                "variant": "warning",
+                "title": "The key must match exactly",
+                "content": "Get it wrong, and you'll either get an exception (caught internally and logged) or garbled data back. There's no way to distinguish \"wrong key\" from \"corrupted data\" from the outside."
+            },
+            {
+                "type": "note",
+                "variant": "warning",
+                "title": "Don't hardcode a real key",
+                "content": "Anyone can decompile a shipped build and read a plain hardcoded string straight out. AccountLogInExample.cs does exactly this for simplicity, but a real game should derive the key from something less obvious. Combining a build-time constant with a device identifier, for example."
+            },
+            "Encryption can be freely combined with compression and slots. See the pipeline described in the Basic Concepts section."
+        ]
+    },
+    {
+        "title": "Compression",
+        "content": [
+            "Compression shrinks your save data. Worth turning on once a save gets large: an open-world state, a big inventory, anything with a lot of repeated structure.",
+            {
+                "type": "code",
+                "language": "csharp",
+                "title": "Compressed save and load",
+                "code": [
+                    "SimpleSaveLoad.SetData(\"WorldState\", worldData, compress: true);",
+                    "var world = SimpleSaveLoad.GetData<WorldData>(\"WorldState\", compress: true);"
+                ]
+            },
+            {
+                "type": "note",
+                "variant": "warning",
+                "title": "Compress must match",
+                "content": "Compress isn't auto-detected. You must pass the same value on load as you did on save. Loading with the wrong setting will throw, since it'll try to Gzip-decompress data that was never compressed (or vice versa)."
+            },
+            "You can combine compression with encryption:",
+            {
+                "type": "code",
+                "language": "csharp",
+                "title": "Compression and encryption together",
+                "code": [
+                    "SimpleSaveLoad.SetData(\"WorldState\", worldData, encryptionKey: \"key\", compress: true);"
+                ]
+            },
+            "As covered in Basic Concepts, compression always runs before encryption on save, and decryption always runs before decompression on load. You don't need to manage this order yourself, just pass both parameters and the pipeline handles it correctly.",
+            "`InventorySaverExample.cs` demonstrates compression on a `List<InventoryItem>`."
+        ]
+    },
+    {
+        "title": "SaveAsync & LoadAsync",
+        "content": [
+            "Every core method has an async counterpart:",
+            {
+                "type": "code",
+                "language": "csharp",
+                "title": "Async signatures",
+                "code": [
+                    "Task SimpleSaveLoad.SetDataAsync<T>(...);",
+                    "Task<T> SimpleSaveLoad.GetDataAsync<T>(...);",
+                    "Task SimpleSaveLoad.SetDataAsync(string key, GameObject go, ...);",
+                    "Task SimpleSaveLoad.LoadIntoAsync(string key, GameObject target, ...);"
+                ]
+            },
+            "The synchronous versions can briefly block the calling thread while data is written or read, usually negligible for small local saves, but noticeable for large saves, or for a custom storage provider that talks to the network. The async versions let your game keep running while the save/load happens in the background.",
+            {
+                "type": "code",
+                "language": "csharp",
+                "title": "Async save and load",
+                "code": [
+                    "await SimpleSaveLoad.SetDataAsync(\"Inventory\", myInventoryList);",
+                    "var inv = await SimpleSaveLoad.GetDataAsync<List<Item>>(\"Inventory\");"
+                ]
+            },
+            "The default `LocalDiskStorage` implements a companion interface, `IAsyncSaveStorage`, doing genuine asynchronous file I/O (not just running the synchronous version on a background thread). If you write your own custom storage provider and it's naturally async, an HTTP call, for example, implement `IAsyncSaveStorage` on it too, and `SetDataAsync`/`GetDataAsync` will call your async methods directly instead of falling back to a background thread.",
+            "Following the same rule as the synchronous version: there's no `GetDataAsync<GameObject>()`, since a GameObject can't be created from nothing. Use `LoadIntoAsync` instead, applying the saved state onto an existing instance:",
+            {
+                "type": "code",
+                "language": "csharp",
+                "title": "GameObjectSaver.cs (excerpt)",
+                "code": [
+                    "private async void Start()",
+                    "{",
+                    "    await SimpleSaveLoad.LoadIntoAsync(GameObjectKey, gameObject);",
+                    "}",
+                    "",
+                    "private async void OnDestroy()",
+                    "{",
+                    "    await SimpleSaveLoad.SetDataAsync(GameObjectKey, gameObject);",
+                    "}"
+                ]
+            },
+            {
+                "type": "note",
+                "variant": "warning",
+                "title": "Awaiting inside OnDestroy",
+                "content": "Awaiting inside OnDestroy is a little risky in general. If the object is being destroyed as part of a scene unload, the reference might not survive long enough for the await to resume cleanly. It's fine for a small example. In production code, prefer triggering saves from something more deterministic, like a \"Save & Quit\" button."
+            }
+        ]
+    },
+    {
+        "title": "File Backups And Corruption Recovery",
+        "content": [
+            "This feature is fully automatic, there's no API to call, no parameter to set. It's worth understanding anyway, since it affects what you'll see on disk.",
+            "**What happens on every save.** Before `LocalDiskStorage` (the default storage provider) overwrites a save file, it copies the previous version to a `.bak` file next to it. The new data is then written to a temporary file first, and only swapped into place once the write finishes completely. This means a crash or power loss mid-write can never leave you with a half-written, corrupt save file. You either get the old file or the fully-written new one, never something in between. Even if a save file somehow becomes unreadable later, the previous good version is still sitting right next to it.",
+            "**What happens on load.** If `GetData` (or the lower-level `StorageProvider.GetData`) can't read the primary file for any reason, it automatically falls back to the `.bak` file before giving up. This is transparent, you don't write any extra code to benefit from it.",
+            "**Manual recovery.** If you want to inspect or manually restore a backup, the in-editor Save Manager has a \"Restore From Backup\" button for exactly this."
+        ]
+    },
+    {
+        "title": "Auto Save Manager Component",
+        "content": [
+            "`AutoSaveManager` is a `MonoBehaviour` you place on any GameObject in your scene to handle ongoing, automatic saving, instead of calling `SetData` by hand every time something changes.",
+            "Add the component via Add Component -> Swimpie -> Simple Save & Load -> Auto Save Manager, or in code:",
+            {
+                "type": "code",
+                "language": "csharp",
+                "title": "Adding the component",
+                "code": [
+                    "gameObject.AddComponent<AutoSaveManager>();"
+                ]
+            },
+            "Inspector settings:\n\n- **Save Mode** - `Interval`, `OnQuit`, or `IntervalAndOnQuit` - when automatic saves happen.\n- **Interval** - seconds between saves (only editable/used if Save Mode includes Interval).\n- **Slot** - which slot all registered entries save into.\n- **Encryption Key** - optional, encrypts everything this manager saves.\n- **Compress** - optional, compresses everything this manager saves.\n- **Save On Pause** - also save when the app is paused, e.g. mobile home button (only editable/used if Save Mode includes OnQuit).",
+            "Nothing is auto-saved until you tell the manager about it, using `AddToAutoSave`. There are a few overloads depending on what you're registering.",
+            "A plain value, via a getter and setter (since C# can't \"reach into\" a variable on its own):",
+            {
+                "type": "code",
+                "language": "csharp",
+                "title": "Registering a value",
+                "code": [
+                    "autoSaver.AddToAutoSave(\"Player_Gold\", () => gold, v => gold = v);"
+                ]
+            },
+            "A whole GameObject:",
+            {
+                "type": "code",
+                "language": "csharp",
+                "title": "Registering a GameObject",
+                "code": [
+                    "autoSaver.AddToAutoSave(\"Player\", playerGameObject);"
+                ]
+            },
+            "A Component's own serializable fields:",
+            {
+                "type": "code",
+                "language": "csharp",
+                "title": "Registering a Component",
+                "code": [
+                    "autoSaver.AddToAutoSave(\"Stats\", statsComponent);"
+                ]
+            },
+            "`AutoSaveExample.cs` shows the getter/setter form for two plain `int` fields, registered in `Awake()`:",
+            {
+                "type": "code",
+                "language": "csharp",
+                "title": "AutoSaveExample.cs (excerpt)",
+                "code": [
+                    "private void Awake()",
+                    "{",
+                    "    autoSaver = GetComponent<AutoSaveManager>();",
+                    "    autoSaver.AddToAutoSave(\"Player_Health\", () => health, value => health = value);",
+                    "    autoSaver.AddToAutoSave(\"Player_Gold\", () => gold, v => gold = v);",
+                    "}"
+                ]
+            },
+            {
+                "type": "note",
+                "variant": "info",
+                "title": "Why Awake(), not Start()",
+                "content": "Every AddToAutoSave call loads that entry's saved value immediately upon registration. Registering in Awake() means the value is already loaded before any Start() method elsewhere might expect it to be."
+            },
+            "Always unregister anything that can be destroyed mid-game, otherwise the manager will try to call a getter/setter (or touch a Component) that no longer exists the next time it auto-saves:",
+            {
+                "type": "code",
+                "language": "csharp",
+                "title": "Unregistering on destroy",
+                "code": [
+                    "private void OnDestroy()",
+                    "{",
+                    "    if (autoSaver == null) return;",
+                    "    autoSaver.RemoveFromAutoSave(\"Player_Health\");",
+                    "    autoSaver.RemoveFromAutoSave(\"Player_Gold\");",
+                    "}"
+                ]
+            },
+            "Independent of the timer and Save Mode, you can trigger a save or load of everything currently registered at any time, handy for \"Save\" / \"Load\" buttons:",
+            {
+                "type": "code",
+                "language": "csharp",
+                "title": "Manual save and load",
+                "code": [
+                    "autoSaver.ManualSave();",
+                    "autoSaver.ManualLoad();"
+                ]
+            }
+        ]
+    },
+    {
+        "title": "In-Editor Save Manager",
+        "content": [
+            "A dedicated editor window for inspecting your save files without leaving Unity. Open it via Tools -> Swimpie -> Saves Manager.",
+            "What it lets you do:\n\n- Browse every save file, optionally filtered by slot and by a key search string.\n- Open the local save folder directly in your file explorer.\n- Preview a save file's raw content.\n- Decrypt / Decompress a preview on demand, enter the encryption key and/or toggle \"Data is GZip Compressed\" to view the real content of an encrypted or compressed save.\n- Restore From Backup, manually overwrite a save file with its `.bak` copy.\n- Delete individual save files, or use Delete ALL Saves to wipe everything for the currently-filtered slot.",
+            {
+                "type": "note",
+                "variant": "info",
+                "title": "Editor-only tool",
+                "content": "This window is purely a development/debugging tool, it doesn't run in a build, and nothing you do here is required for your game to work correctly."
+            }
+        ]
+    },
+    {
+        "title": "Creating Custom Storage Providers",
+        "content": [
+            "Everything up to this point assumed data goes to local disk. That's controlled entirely by one static field:",
+            {
+                "type": "code",
+                "language": "csharp",
+                "title": "StorageProvider",
+                "code": [
+                    "public static ISaveStorage SimpleSaveLoad.StorageProvider;"
+                ]
+            },
+            "...which defaults to `new LocalDiskStorage()`. Swap it for your own implementation, and every `SetData`/`GetData`/`Exists`/`Delete`/`DeleteAll` call throughout your entire project routes through it instead, nothing else in your code needs to change.",
+            {
+                "type": "code",
+                "language": "csharp",
+                "title": "The ISaveStorage interface",
+                "code": [
+                    "public interface ISaveStorage",
+                    "{",
+                    "    void SetData(string path, string data);",
+                    "    string GetData(string path);",
+                    "    bool Exists(string path);",
+                    "    void Delete(string path);",
+                    "    void DeleteDirectory(string path);",
+                    "}"
+                ]
+            },
+            "`path` is the same local-style path the disk provider would use (e.g. `.../AutoSave/Inventory.json`), treat it as a unique identifier if your backend doesn't think in terms of file paths. `SetData`/`GetData` must round-trip the exact string given to them. `DeleteDirectory` receives a folder/prefix, not a single save's path, it's what powers `DeleteAll(slot)`.",
+            "`CustomSavingExample.cs` provides a bare template with all five methods stubbed as `throw new NotImplementedException()`, ready to fill in:",
+            {
+                "type": "code",
+                "language": "csharp",
+                "title": "CustomSavingExample.cs (excerpt)",
+                "code": [
+                    "public class MyCustomStorageProvider : ISaveStorage",
+                    "{",
+                    "    public void SetData(string path, string data) { /* TODO */ }",
+                    "    public string GetData(string path) { /* TODO */ }",
+                    "    public bool Exists(string path) { /* TODO */ }",
+                    "    public void Delete(string path) { /* TODO */ }",
+                    "    public void DeleteDirectory(string path) { /* TODO */ }",
+                    "}"
+                ]
+            },
+            "Assign it once at startup, before any saves/loads happen:",
+            {
+                "type": "code",
+                "language": "csharp",
+                "title": "Assigning the provider",
+                "code": [
+                    "private void Awake()",
+                    "{",
+                    "    SimpleSaveLoad.StorageProvider = new MyCustomStorageProvider();",
+                    "}"
+                ]
+            },
+            "If your backend is naturally asynchronous (a REST API, a cloud SDK), also implement:",
+            {
+                "type": "code",
+                "language": "csharp",
+                "title": "The IAsyncSaveStorage interface",
+                "code": [
+                    "public interface IAsyncSaveStorage : ISaveStorage",
+                    "{",
+                    "    Task SetDataAsync(string path, string data);",
+                    "    Task<string> GetDataAsync(string path);",
+                    "}"
+                ]
+            },
+            "Doing this means `SimpleSaveLoad.SetDataAsync`/`GetDataAsync` call your real async methods directly, rather than blocking a background thread on a synchronous call."
+        ]
+    }
+]
