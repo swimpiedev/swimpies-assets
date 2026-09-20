@@ -113,31 +113,9 @@ const categories = [
         id: "scripts-systems",
         name: "Scripts & Systems",
         description: "Unity scripts, gameplay systems and editor tools."
-    },
-    {
-        id: "3d-models",
-        name: "3D Models",
-        description: "3D models, props and environment pieces."
-    },
-    {
-        id: "vfx",
-        name: "VFX",
-        description: "Visual effects, particles and shaders."
-    },
-    {
-        id: "sfx",
-        name: "SFX",
-        description: "Sound effects and audio packs."
-    },
-    {
-        id: "addons",
-        name: "Add-ons",
-        description: "Extensions that build on my other assets."
     }
 ];
 
 const featuredAssets = [
-    "example-inventory",   
-    "example-vfx",         
-    "example-unity-tool"   
+    "simple-save-&-load",  
 ];
