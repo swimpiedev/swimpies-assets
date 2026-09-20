@@ -924,23 +924,19 @@ function renderAssetDetailPage(container, asset) {
 
     var metaRows = "";
 
-    if (versionLabel) {
-        metaRows += metaRow("Version", escapeHtml(versionLabel));
-    }
+    if (versionLabel) metaRows += metaRow("Version", escapeHtml(versionLabel));
+
     metaRows += metaRow("Category", category
         ? internalLink(categoryUrl(asset.category), escapeHtml(category.name), "")
         : "Uncategorized");
-    if (asset.created) {
-        metaRows += metaRow("First released", escapeHtml(formatDate(asset.created)));
-    }
+
+    if (asset.created) metaRows += metaRow("First released", escapeHtml(formatDate(createdData)));
     if (updatedDate) {
         metaRows += metaRow("Last updated",
             escapeHtml(formatRelativeDate(updatedDate)) +
             ' <span class="meta-exact">(' + escapeHtml(formatDate(updatedDate)) + ")</span>");
     }
-    if ((asset.tags || []).length) {
-        metaRows += metaRow("Tags", '<span class="detail-tags">' + renderTagPills(asset) + "</span>");
-    }
+    if ((asset.tags || []).length) metaRows += metaRow("Tags", '<span class="detail-tags">' + renderTagPills(asset) + "</span>");
 
     container.innerHTML =
         '<div class="page detail-page">' +
@@ -1267,12 +1263,25 @@ function filterAssets(list, state) {
     });
 }
 
+function getAssetCreatedDate(asset) {
+    var changelog = getChangelog(asset);
+    var oldest = "";
+
+    if (changelog) {
+        changelog.forEach(function (entry) {
+            if (entry.date && (!oldest || dateValue(entry.date) < dateValue(oldest))) oldest = entry.date;
+        });
+    }
+
+    return oldest || asset.updated || "";
+}
+
 function sortAssets(list, sort) {
     var sorted = list.slice();
 
     switch (sort) {
         case "oldest":
-            sorted.sort(function (a, b) { return dateValue(a.created) - dateValue(b.created); });
+            sorted.sort(function (a, b) { return dateValue(getAssetCreatedDate(a)) - dateValue(getAssetCreatedDate(b)); });
             break;
         case "updated":
             sorted.sort(function (a, b) { return dateValue(b.updated) - dateValue(a.updated); });
@@ -1284,7 +1293,7 @@ function sortAssets(list, sort) {
             sorted.sort(function (a, b) { return getEffectivePrice(a) - getEffectivePrice(b); });
             break;
         default:
-            sorted.sort(function (a, b) { return dateValue(b.created) - dateValue(a.created); });
+            sorted.sort(function (a, b) { return dateValue(getAssetCreatedDate(b)) - dateValue(getAssetCreatedDate(a)); });
     }
 
     return sorted;
