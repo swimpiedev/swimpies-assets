@@ -258,10 +258,12 @@ var TOKEN_WORD = /[A-Za-z_]\w*/;
 
 var SYNTAX_LANGUAGES = {
     csharp: {
+        generics: true,
         comment: TOKEN_COMMENT_C,
         keywords: "abstract as async await base bool break byte case catch char checked class const continue decimal default delegate do double else enum event explicit extern false finally fixed float for foreach get goto if implicit in init int interface internal is lock long namespace new null object operator out override params partial private protected public readonly record ref return sbyte sealed set short sizeof static string struct switch this throw true try typeof uint ulong unchecked unsafe ushort using var virtual void volatile when where while yield"
     },
     js: {
+        generics: true,
         comment: TOKEN_COMMENT_C,
         keywords: "abstract as async await break case catch class const continue debugger default delete do else enum export extends false finally for from function if implements import in instanceof interface let new null of private protected public readonly return static super switch this throw true try type typeof undefined var void while with yield"
     },
@@ -282,6 +284,24 @@ var SYNTAX_ALIASES = {
     "json": "json",
     "bash": "bash", "shell": "bash", "sh": "bash"
 };
+
+function isGenericCall(text) {
+    if (text.charAt(0) !== "<") return false;
+
+    var depth = 0;
+
+    for (var i = 0; i < text.length && i < 200; i++) {
+        var ch = text.charAt(i);
+
+        if (ch === "<") depth++;
+        else if (ch === ">") depth--;
+        else if (!/[\w\s,.?\[\]]/.test(ch)) return false;
+
+        if (depth === 0) return /^\s*\(/.test(text.slice(i + 1));
+    }
+
+    return false;
+}
 
 function getSyntaxLanguage(name) {
     var key = SYNTAX_ALIASES[String(name || "").toLowerCase()];
@@ -314,19 +334,13 @@ function highlightCode(code, language) {
         var end = match.index + text.length;
         var type = null;
 
-        if (match[1]) {
-            type = "comment";
-        } else if (match[2]) {
-            type = (def.keys && /^\s*:/.test(code.slice(end, end + 20))) ? "key" : "string";
-        } else if (match[3]) {
-            type = "number";
-        } else if (Object.prototype.hasOwnProperty.call(def.keywordMap, text)) {
-            type = "keyword";
-        } else if (code.charAt(end) === "(") {
-            type = "function";
-        } else if (code.charAt(match.index - 1) !== "." && /^[A-Z]/.test(text)) {
-            type = "type";
-        }
+        if (match[1]) type = "comment";
+        else if (match[2]) type = (def.keys && /^\s*:/.test(code.slice(end, end + 20))) ? "key" : "string";
+        else if (match[3]) type = "number";
+        else if (Object.prototype.hasOwnProperty.call(def.keywordMap, text)) type = "keyword";
+        else if (/^[A-Z]/.test(text) && /\bnew\s+$/.test(code.slice(Math.max(0, match.index - 12), match.index))) type = "type";
+        else if (code.charAt(end) === "(" || (def.generics && isGenericCall(code.slice(end, end + 200)))) type = "function";
+        else if (code.charAt(match.index - 1) !== "." && /^[A-Z]/.test(text)) type = "type";
 
         out += escapeHtml(code.slice(last, match.index));
         out += type
@@ -1077,8 +1091,8 @@ function normalizeCode(code) {
     var text = Array.isArray(code) ? code.join("\n") : String(code || "");
     return text
         .replace(/\r\n?/g, "\n")
-        .replace(/^\s*\n/, "")   // drop leading blank lines
-        .replace(/\s+$/, "");    // drop trailing whitespace
+        .replace(/^\s*\n/, "")
+        .replace(/\s+$/, "");
 }
 
 function renderDocCode(item) {
@@ -1099,7 +1113,6 @@ function renderDocNote(item) {
         "</div>";
 }
 
-// Renders one item inside a section: a string (text) or a {type: ...} object.
 function renderDocItem(item) {
     if (item === null || item === undefined) return "";
     if (typeof item === "string") {
@@ -1124,20 +1137,13 @@ function renderDocBlock(block, index) {
         ? '<h2 class="doc-section-title">' + escapeHtml(block.title) + "</h2>"
         : "";
 
-    if (block.type === "code") {
-        // Legacy top-level code block: the title is the section heading.
-        html += heading + renderDocCode(block);
-    } else if (block.type === "note") {
-        // Legacy top-level note: the title lives inside the note.
-        html += renderDocNote(block);
-    } else {
-        // Text section. `content` may be a string or an array of items.
+    if (block.type === "code") html += heading + renderDocCode(block);
+    else if (block.type === "note") html += renderDocNote(block);
+    else {
         html += heading;
-        if (Array.isArray(block.content)) {
-            html += block.content.map(renderDocItem).join("");
-        } else {
-            html += renderDocItem(block.content);
-        }
+
+        if (Array.isArray(block.content))  html += block.content.map(renderDocItem).join("");
+        else html += renderDocItem(block.content);
     }
 
     return html + "</section>";
