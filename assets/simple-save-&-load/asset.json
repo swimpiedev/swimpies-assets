@@ -6,7 +6,7 @@
     "price": 4.99,
     "sale": 0,
     "category": "scripts-systems",
-    "tags":["Utility, Library, Editor Extension, Modular, Cross-Platform, Source-Included"],
+    "tags":["Utility", "Library", "Editor Extension", "Modular", "Cross-Platform", "Source-Included"],
     "mediaType": "image",
     "media": "image.svg",
     "unityUrl": "https://assetstore.unity.com/packages/slug/410046",
