@@ -1203,7 +1203,7 @@ function renderDocumentationPage(container, asset) {
                     '<span class="docs-kicker">Documentation</span>' +
                     '<h1 class="docs-title">' + escapeHtml(asset.name) + "</h1>" +
                     '<p class="docs-subtitle">' +
-                        (versionLabel ? "Version " + escapeHtml(versionLabel) + " Â· " : "") +
+                        (versionLabel ? "Version " + escapeHtml(versionLabel) + " · " : "") +
                         (updatedDate ? escapeHtml(formatRelativeDate(updatedDate)) : "") +
                     "</p>" +
                 "</div>" +

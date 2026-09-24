@@ -1,14 +1,14 @@
 {
     "id": "simple-save-&-load",
     "name": "Simple Save & Load",
-    "shortDescription": "Short description",
+    "shortDescription": "A flexible save & load system with encryption, compression, auto-save, save slots, async support, and custom storage backends.",
     "description": "Description",
     "price": 4.99,
     "sale": 0,
     "category": "scripts-systems",
-    "tags":["Tools"],
+    "tags":["Utility, Library, Editor Extension, Modular, Cross-Platform, Source-Included"],
     "mediaType": "image",
     "media": "image.svg",
-    "unityUrl": "YOUR UNITY ASSET STORE URL",
+    "unityUrl": "https://assetstore.unity.com/packages/slug/410046",
     "itchUrl": ""
 }
