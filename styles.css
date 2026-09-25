@@ -1064,6 +1064,10 @@ a.tag-pill:hover {
     align-items: start;
 }
         
+.detail-media-column {
+    min-width: 0;
+}
+
 .detail-media {
     border-radius: var(--radius-lg);
     overflow: hidden;
@@ -1179,13 +1183,47 @@ a.tag-pill:hover {
 }
 
 .detail-about { 
-    margin-top: 44px; 
-    max-width: 780px; 
+    margin-top: 24px; 
 }
         
-.detail-about h2 { 
-    font-size: 1.45rem; 
-    margin-bottom: 16px; 
+.detail-disclosure {
+    border-bottom: 1px solid var(--color-border);
+}
+
+.detail-disclosure:first-child {
+    border-top: 1px solid var(--color-border);
+}
+
+.detail-disclosure summary {
+    position: relative;
+    padding: 16px 36px 16px 0;
+    color: var(--color-navy);
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    font-weight: 600;
+    cursor: pointer;
+    list-style: none;
+}
+
+.detail-disclosure summary::-webkit-details-marker {
+    display: none;
+}
+
+.detail-disclosure summary::after {
+    content: "+";
+    position: absolute;
+    right: 4px;
+    color: var(--color-blue);
+    font-size: 1.5rem;
+    line-height: 1;
+}
+
+.detail-disclosure[open] summary::after {
+    content: "-";
+}
+
+.detail-disclosure .formatted-text {
+    padding: 0 0 18px;
 }
 
 .docs-page { 
@@ -1292,6 +1330,13 @@ a.tag-pill:hover {
     background: var(--color-blue-soft); 
     color: var(--color-blue); 
     text-decoration: none; 
+}
+
+.docs-toc a[aria-current="location"] {
+    background: var(--color-blue-soft);
+    color: var(--color-blue);
+    font-weight: 600;
+    box-shadow: inset 3px 0 var(--color-blue);
 }
 
 .doc-section { 
@@ -1664,6 +1709,22 @@ a.tag-pill:hover {
     }
     .detail-layout { 
         grid-template-columns: 1fr; 
+        grid-template-areas:
+            "media"
+            "info"
+            "about";
+    }
+    .detail-media-column {
+        display: contents;
+    }
+    .detail-media {
+        grid-area: media;
+    }
+    .detail-info {
+        grid-area: info;
+    }
+    .detail-about {
+        grid-area: about;
     }
     .docs-layout { 
         grid-template-columns: 1fr; 

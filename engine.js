@@ -1020,6 +1020,7 @@ function metaRow(key, valueHtml) {
 function renderAssetDetailPage(container, asset) {
     var category = getCategoryById(asset.category);
     var description = asset.description || asset.shortDescription || "No description available yet.";
+    var technicalDetails = asset.technicalDetails || "No technical details available yet.";
     var docs = getDocumentation(asset);
     var changelog = getChangelog(asset);
     var versionLabel = getAssetVersion(asset);
@@ -1048,7 +1049,19 @@ function renderAssetDetailPage(container, asset) {
                     internalLink(pageUrl("assets"), icon("arrow-left", 15) + " Back to Assets", "back-link") +
                 "</div>" +
                 '<div class="detail-layout">' +
-                    '<div class="detail-media media-frame">' + renderMedia(asset) + "</div>" +
+                    '<div class="detail-media-column">' +
+                        '<div class="detail-media media-frame">' + renderMedia(asset) + "</div>" +
+                        '<section class="detail-about">' +
+                            '<details class="detail-disclosure">' +
+                                "<summary>Description</summary>" +
+                                '<div class="formatted-text">' + formatDocText(description) + "</div>" +
+                            "</details>" +
+                            '<details class="detail-disclosure">' +
+                                "<summary>Technical details</summary>" +
+                                '<div class="formatted-text">' + formatDocText(technicalDetails) + "</div>" +
+                            "</details>" +
+                        "</section>" +
+                    "</div>" +
                     '<div class="detail-info">' +
                         (category
                             ? '<div class="detail-meta">' +
@@ -1079,10 +1092,6 @@ function renderAssetDetailPage(container, asset) {
                         (metaRows ? '<ul class="detail-meta-list">' + metaRows + "</ul>" : "") +
                     "</div>" +
                 "</div>" +
-                '<section class="detail-about">' +
-                    "<h2>About this asset</h2>" +
-                    '<div class="formatted-text">' + formatDocText(description) + "</div>" +
-                "</section>" +
             "</div>" +
         "</div>";
 }
@@ -1147,6 +1156,30 @@ function renderDocBlock(block, index) {
     }
 
     return html + "</section>";
+}
+
+function updateDocumentationToc() {
+    var links = document.querySelectorAll(".docs-toc a");
+    if (!links.length) return;
+
+    var activeLink = links[0];
+    var atPageEnd = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 2;
+
+    if (atPageEnd) {
+        activeLink = links[links.length - 1];
+    } else {
+        Array.prototype.forEach.call(links, function (link) {
+            var target = document.getElementById(link.getAttribute("href").slice(1));
+            if (target && target.getBoundingClientRect().top <= 120) activeLink = link;
+        });
+    }
+
+    Array.prototype.forEach.call(links, function (link) {
+        var isActive = link === activeLink;
+        link.classList.toggle("active", isActive);
+        if (isActive) link.setAttribute("aria-current", "location");
+        else link.removeAttribute("aria-current");
+    });
 }
 
 function renderDocumentationPage(container, asset) {
@@ -1215,6 +1248,13 @@ function renderDocumentationPage(container, asset) {
         "</div>";
 
     setupCopyButtons(container);
+
+    if (!window._docsTocListenersRegistered) {
+        window.addEventListener("scroll", updateDocumentationToc, { passive: true });
+        window.addEventListener("resize", updateDocumentationToc);
+        window._docsTocListenersRegistered = true;
+    }
+    updateDocumentationToc();
     
     Array.prototype.forEach.call(container.querySelectorAll(".docs-toc a"), function (link) {
         link.addEventListener("click", function (event) {
@@ -1318,7 +1358,7 @@ function renderChangelogPage(container, asset) {
                     '<span class="docs-kicker">Changelog</span>' +
                     '<h1 class="docs-title">' + escapeHtml(asset.name) + "</h1>" +
                     '<p class="docs-subtitle">' +
-                        (versionLabel ? "Version " + escapeHtml(versionLabel) + " Â· " : "") +
+                        (versionLabel ? "Version " + escapeHtml(versionLabel) + " · " : "") +
                         (updatedDate ? escapeHtml(formatRelativeDate(updatedDate)) : "") +
                     "</p>" +
                 "</div>" +

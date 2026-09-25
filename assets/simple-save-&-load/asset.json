@@ -1,14 +1,22 @@
 {
-    "id": "simple-save-&-load",
-    "name": "Simple Save & Load",
-    "shortDescription": "A flexible save & load system with encryption, compression, auto-save, save slots, async support, and custom storage backends.",
-    "description": "Description",
-    "price": 4.99,
-    "sale": 0,
-    "category": "scripts-systems",
-    "tags":["Utility", "Library", "Editor Extension", "Modular", "Cross-Platform", "Source-Included"],
-    "mediaType": "image",
-    "media": "image.svg",
-    "unityUrl": "https://assetstore.unity.com/packages/slug/410046",
-    "itchUrl": ""
+  "id": "simple-save-&-load",
+  "name": "Simple Save & Load",
+  "shortDescription": "A flexible save & load system with encryption, compression, auto-save, save slots, async support, and custom storage backends.",
+  "description": "Simple Save & Load is a complete save system for Unity, built to handle everything from a quick prototype's save file to a shipped game's encrypted, multi-slot save data.\nNo wrestling with JsonUtility, no writing your own file I/O, no bolting on encryption after the fact, save almost anything with one line of code, and layer on exactly the features your project needs.\n\n\n**🎯 Save Anything, Instantly**\n\nPrimitives, enums, Unity types (Vector3, Quaternion, Color...), collections (List, Dictionary, HashSet...), your own custom classes, and even whole GameObjects, all saved and loaded the same simple way.\n\n\n**🔐 Secure & Efficient**\n\nBuilt-in AES-256 encryption keeps save data safe from casual editing. GZip compression keeps large saves small. Both can be combined, and both are entirely optional per save.\n\n\n**🧩 Fully Modular**\n\nUse only what you need. Add save slots for multiple profiles or save files. Drop in the AutoSaveManager for auto saving on an interval or on quit. Go async when a save shouldn't hitch the game. Every feature is opt-in.\n\n\n**🛰️ Bring Your Own Backend**\n\nShips with local disk storage out of the box, but isn't locked to it. Implement one small interface and redirect every save/load call in your project to your own cloud service or server. No other code changes required.\n\n\n**🩹 Self-Healing Saves**\n\nEvery save automatically backs up the previous version and writes atomically, so a crash mid-save can never corrupt your player's progress. Recovery is transparent so your game never needs to know it happened.\n\n\n**🔍 See Everything, In-Editor**\n\nA built-in Save Manager window lets you browse, preview, decrypt, and manage every save file without leaving Unity.\n\nWhether you're building a small prototype or a full save system for a shipping RPG, roguelike, or survival game, Simple Save & Load scales from \"just make it work\" to \"make it secure, fast, and cloud-ready\", without switching tools.\nFully documented with a complete step-by-step guide, and real example scripts covering every feature.",
+  "technicalDetails": "**SimpleSaveLoad (Core)**\n\nStatic API for saving and loading data by key: SetData, GetData, Exists, Delete, DeleteAll. Handles serialization, optional compression, and optional encryption in a single consistent pipeline. No manager object required. Call it from any script, anywhere.\n\n**Type Support**\n\nNative support for primitives, strings, enums, and decimal, Unity types Vector2/3/4, Quaternion, Color, Rect, Bounds, and DateTime, collections List, Dictionary, Stack, Queue, HashSet, LinkedList, and arrays (including 2D), any custom [Serializable] class or struct, and GameObjects via dedicated SetData/LoadInto overloads.\n\n**Save Slots**\n\nPass a slot name to any operation to isolate save data into separate named buckets, the same key means independent data per slot, enabling multiple save files or player profiles with no extra setup.\n\nAES-256 Encryption\nOptional per-save encryption via a string key, hashed into a proper 256-bit key. A fresh random IV is generated per save, so identical data never produces identical ciphertext twice.\n\n**GZip Compression**\n\nOptional per-save compression for large save payloads. Compression always runs before encryption on save, and after decryption on load, automatically.\n\n**File Backups & Corruption Recovery**\n\nEvery write on the default storage provider keeps the previous version as a backup and writes atomically via a temp-file swap. Reads transparently fall back to the backup if the primary file is unreadable.\n\n**AutoSaveManager**\n\nA drop-in component with three save modes: Interval, On Quit, or both. Register plain values (via getter/setter or field name), whole GameObjects, or individual Components for automatic saving and loading, with manual save/load also available on demand.\n\n**Async Save & Load**\n\nSetDataAsync/GetDataAsync counterparts to every core method, so large saves or slow custom backends never block the main thread. The default disk provider performs genuine async file I/O, not just background-thread offloading.\n\n**Custom Storage Providers**\n\nImplement ISaveStorage (and optionally IAsyncSaveStorage) to redirect all saving/loading to any backend, a REST API, a cloud SDK, or anything else, with zero changes needed elsewhere in your project.\n\n**In-Editor Save Manager**\n\nAn editor window (Tools → Swimpie → Save Manager) for browsing, filtering by slot/key, previewing, decrypting/decompressing, restoring backups, and deleting save files without leaving Unity.\n\n**Supported Platforms**\n\nWindows, macOS, Linux, iOS, Android, WebGL, anywhere Unity's System.IO and System.Security.Cryptography are available.",
+  "price": 4.99,
+  "sale": 0,
+  "category": "scripts-systems",
+  "tags": [
+    "Utility",
+    "Library",
+    "Editor Extension",
+    "Modular",
+    "Cross-Platform",
+    "Source-Included"
+  ],
+  "mediaType": "image",
+  "media": "image.svg",
+  "unityUrl": "https://assetstore.unity.com/packages/slug/410046",
+  "itchUrl": ""
 }
